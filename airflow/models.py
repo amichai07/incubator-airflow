@@ -5200,6 +5200,7 @@ class DagRun(Base, LoggingMixin):
         Determines the overall state of the DagRun based on the state
         of its TaskInstances.
 
+        :param finished_tasks: The finished tasks collected ordered by dagrun
         :return: State
         """
 

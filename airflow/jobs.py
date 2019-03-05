@@ -910,6 +910,7 @@ class SchedulerJob(BaseJob):
         queue.
         """
 
+        dag_run_finished_ti_map = {}
         # update the state of the previously active dag runs
         dag_runs = DagRun.find(dag_id=dag.dag_id, state=State.RUNNING, session=session)
         active_dag_runs = []
@@ -935,7 +936,9 @@ class SchedulerJob(BaseJob):
             run.dag = dag
             # todo: preferably the integrity check happens at dag collection time
             run.verify_integrity(session=session)
-            run.update_state(session=session)
+            finished_tasks = run.get_task_instances(state=State.finished(), session=session)
+            dag_run_finished_ti_map[run.id] = finished_tasks
+            run.update_state(session=session, finished_tasks=dag_run_finished_ti_map[run.id])
             if run.state == State.RUNNING:
                 make_transient(run)
                 active_dag_runs.append(run)
